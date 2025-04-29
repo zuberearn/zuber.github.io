@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Out Punch</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #e74c3c; /* लाल रंग - आउट पंच के लिए */
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            width: calc(100% - 22px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input[readonly] {
+            background-color: #eee;
+            color: #777;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            background-color: #e74c3c; /* लाल रंग - आउट पंच के लिए */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #c0392b; /* गहरा लाल रंग */
+        }
+
+        .reload-btn {
+            background-color: #28a745; /* हरा रंग */
+            color: white;
+        }
+
+        .reload-btn:hover {
+            background-color: #1e7e34; /* गहरा हरा रंग */
+        }
+
+        .home-link {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .home-link a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .home-link a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+        window.onload = function () {
+            const now = new Date();
+            document.getElementById("currentDate").value = now.toISOString().split("T")[0];
+            document.getElementById("currentTime").value = now.toLocaleTimeString();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lon = position.coords.longitude.toFixed(6);
+                    document.getElementById("currentLocation").value = `Lat: ${lat}, Long: ${lon}`;
+                }, function () {
+                    document.getElementById("currentLocation").value = "Location not available";
+                });
+            } else {
+                document.getElementById("currentLocation").value = "Geolocation not supported";
+            }
+        };
+
+        function submitData() {
+            const empId = document.getElementById("employeeId").value;
+            const name = document.getElementById("employeeName").value;
+            const date = document.getElementById("currentDate").value;
+            const time = document.getElementById("currentTime").value;
+            const location = document.getElementById("currentLocation").value;
+
+            fetch("https://script.google.com/macros/s/AKfycbx686YgCFjEhv1bMaOfViCizIXS439s1JcZVixgrJNFVmFMBZu8MjiqiYDZLixnK8uA/exec", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `employeeId=${encodeURIComponent(empId)}&name=${encodeURIComponent(name)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&location=${encodeURIComponent(location)}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                alert(result);
+                document.getElementById("outPunchForm").reset();
+                window.onload(); // Refill auto fields
+            })
+            .catch(error => {
+                console.error("Error!", error.message);
+            });
+        }
+
+        function reloadPage() {
+            location.reload();
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Out Punch</h2>
+        <form id="outPunchForm" onsubmit="event.preventDefault(); submitData();">
+            <div class="form-group">
+                <label for="employeeId">Employee ID:</label>
+                <input type="text" id="employeeId" required>
+            </div>
+            <div class="form-group">
+                <label for="employeeName">Name:</label>
+                <input type="text" id="employeeName" required>
+            </div>
+            <div class="form-group">
+                <label for="currentDate">Current Date:</label>
+                <input type="date" id="currentDate" readonly>
+            </div>
+            <div class="form-group">
+                <label for="currentTime">Current Time:</label>
+                <input type="text" id="currentTime" readonly>
+            </div>
+            <div class="form-group">
+                <label for="currentLocation">Current Location:</label>
+                <input type="text" id="currentLocation" readonly>
+            </div>
+            <button type="submit" class="btn btn-primary">Punch Out</button>
+            <button type="button" onclick="reloadPage()" class="btn reload-btn">Reload Page</button>
+        </form>
+        <div class="home-link">
+            <a href="index.html">Go to Home Page</a>
+        </div>
+    </div>
+</body>
+</html>
